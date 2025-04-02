@@ -16,29 +16,42 @@ class _MobileAuthState extends State<MobileAuth> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Mobile Auth"), centerTitle: true),
-      body: Column(
-        children: [
-          TextField(
-            controller: mobileController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: "Enter Phone Number"),
-          ),
-          SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.verifyPhoneNumber(
-                verificationCompleted: (PhoneAuthCredential credential) {},
-                verificationFailed: (FirebaseAuthException ex) {},
-                codeSent: (String verificationid, int? resendtoken) {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>OTPVerify(verificationid: '',)));
-                },
-                codeAutoRetrievalTimeout: (String verificationid) {},
-                phoneNumber: mobileController.text.toString(),
-              );
-            },
-            child: Text("Verify Phone Number"),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: mobileController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: "Enter Phone Number",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.verifyPhoneNumber(
+                  phoneNumber: mobileController.text.trim(),
+                  verificationCompleted: (PhoneAuthCredential credential) {},
+                  verificationFailed: (FirebaseAuthException ex) {
+                    print("Verification Failed: ${ex.message}");
+                  },
+                  codeSent: (String verificationId, int? resendToken) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OTPVerify(verificationId: verificationId),
+                      ),
+                    );
+                  },
+                  codeAutoRetrievalTimeout: (String verificationId) {},
+                );
+              },
+              child: Text("Verify Phone Number"),
+            ),
+          ],
+        ),
       ),
     );
   }
