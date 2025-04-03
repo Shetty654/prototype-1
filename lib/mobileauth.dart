@@ -34,6 +34,20 @@ class _MobileAuthState extends State<MobileAuth> {
         child: Column(
           children: [
             TextField(
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                hintText: "Enter user name",
+                border: OutlineInputBorder()
+              ),
+            ),
+            TextField(
+              keyboardType: TextInputType.visiblePassword,
+              decoration: InputDecoration(
+                hintText: "password",
+                border: OutlineInputBorder()
+              ),
+            ),
+            TextField(
               controller: mobileController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
