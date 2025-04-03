@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sample/Home.dart';
 import 'package:sample/otpverify.dart';
+
 
 class MobileAuth extends StatefulWidget {
   const MobileAuth({super.key});
@@ -14,6 +16,17 @@ class _MobileAuthState extends State<MobileAuth> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      Future.microtask(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      });
+      return const SizedBox();
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text("Mobile Auth"), centerTitle: true),
       body: Padding(
@@ -33,7 +46,13 @@ class _MobileAuthState extends State<MobileAuth> {
               onPressed: () async {
                 await FirebaseAuth.instance.verifyPhoneNumber(
                   phoneNumber: mobileController.text.trim(),
-                  verificationCompleted: (PhoneAuthCredential credential) {},
+                  verificationCompleted: (PhoneAuthCredential credential) async {
+                    await FirebaseAuth.instance.signInWithCredential(credential);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context)=>Home()),
+                    );
+                  },
                   verificationFailed: (FirebaseAuthException ex) {
                     print("Verification Failed: ${ex.message}");
                   },

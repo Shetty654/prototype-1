@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sample/Home.dart';
 import 'package:sample/main.dart';
 import 'dart:developer'; // Import for logging
 
@@ -46,7 +47,7 @@ class _OTPVerifyState extends State<OTPVerify> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MyHomePage(title: "Home Page"),
+                      builder: (context) => Home(),
                     ),
                   );
                 } catch (ex) {
