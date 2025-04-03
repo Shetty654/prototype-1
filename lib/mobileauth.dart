@@ -59,7 +59,7 @@ class _MobileAuthState extends State<MobileAuth> {
             ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.verifyPhoneNumber(
-                  phoneNumber: mobileController.text.trim(),
+                  phoneNumber: "+91"+mobileController.text.trim(),
                   verificationCompleted: (PhoneAuthCredential credential) async {
                     await FirebaseAuth.instance.signInWithCredential(credential);
                     Navigator.pushReplacement(
