@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sample/Home.dart';
-import 'package:sample/otpverify.dart';
-
+import 'package:sample/otp_verify.dart';
+import 'package:sample/sign_up.dart';
 
 class MobileAuth extends StatefulWidget {
   const MobileAuth({super.key});
@@ -13,6 +14,27 @@ class MobileAuth extends StatefulWidget {
 
 class _MobileAuthState extends State<MobileAuth> {
   TextEditingController mobileController = TextEditingController();
+
+  Future<void> handlePostLogin(User user, BuildContext context) async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+    if (!snapshot.exists) {
+      print("User does NOT exist, going to SignUp()");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignUp(uid: user.uid)),
+      );
+    } else {
+      print("User exists, going to Home()");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +56,6 @@ class _MobileAuthState extends State<MobileAuth> {
         child: Column(
           children: [
             TextField(
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                hintText: "Enter user name",
-                border: OutlineInputBorder()
-              ),
-            ),
-            TextField(
-              keyboardType: TextInputType.visiblePassword,
-              decoration: InputDecoration(
-                hintText: "password",
-                border: OutlineInputBorder()
-              ),
-            ),
-            TextField(
               controller: mobileController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
@@ -59,13 +67,13 @@ class _MobileAuthState extends State<MobileAuth> {
             ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.verifyPhoneNumber(
-                  phoneNumber: "+91"+mobileController.text.trim(),
+                  phoneNumber: "+91" + mobileController.text.trim(),
                   verificationCompleted: (PhoneAuthCredential credential) async {
                     await FirebaseAuth.instance.signInWithCredential(credential);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context)=>Home()),
-                    );
+                    User? user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      await handlePostLogin(user, context);
+                    }
                   },
                   verificationFailed: (FirebaseAuthException ex) {
                     print("Verification Failed: ${ex.message}");

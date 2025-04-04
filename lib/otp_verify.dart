@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sample/Home.dart';
-import 'package:sample/main.dart';
-import 'dart:developer'; // Import for logging
+import 'package:sample/sign_up.dart';
+import 'dart:developer';
 
 class OTPVerify extends StatefulWidget {
   final String verificationId;
@@ -14,6 +15,27 @@ class OTPVerify extends StatefulWidget {
 
 class _OTPVerifyState extends State<OTPVerify> {
   TextEditingController otpController = TextEditingController();
+
+  Future<void> handlePostLogin(User user, BuildContext context) async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+    if (!snapshot.exists) {
+      print("User does NOT exist, going to SignUp()");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignUp(uid: user.uid)),
+      );
+    } else {
+      print("User exists, going to Home()");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +66,12 @@ class _OTPVerifyState extends State<OTPVerify> {
                   );
 
                   await FirebaseAuth.instance.signInWithCredential(credential);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Home(),
-                    ),
-                  );
+                  User? user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    await handlePostLogin(user, context);
+                  }
                 } catch (ex) {
-                  log("Error: ${ex.toString()}"); // Use log for debugging
+                  log("Error: ${ex.toString()}");
                 }
               },
               child: Text("Verify OTP"),
