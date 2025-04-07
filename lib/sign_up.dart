@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sample/Home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatefulWidget {
   final String uid;
@@ -9,6 +13,19 @@ class SignUp extends StatefulWidget {
 
   @override
   State<SignUp> createState() => _SignUpState();
+}
+
+Future<String> getDeviceId() async {
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.id ?? "unknown_android_device";
+  } else if (Platform.isIOS) {
+    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    return iosInfo.identifierForVendor ?? "unknown_ios_device";
+  } else {
+    return "unsupported_platform";
+  }
 }
 
 class _SignUpState extends State<SignUp> {
@@ -38,10 +55,14 @@ class _SignUpState extends State<SignUp> {
                 border: OutlineInputBorder(),
               ),
             ),
-            ElevatedButton(onPressed: (){
+            ElevatedButton(onPressed: () async {
+                String sessionid = await getDeviceId();
+                final pref = await SharedPreferences.getInstance();
+                pref.setString('sessionid', sessionid);
                 FirebaseFirestore.instance.collection("users").doc(widget.uid).set({
                   "username": usernameController.text,
                   "password": passwordController.text,
+                  "sessionid": sessionid,
                   "createdAt": Timestamp.now(),
                 });
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Home()));

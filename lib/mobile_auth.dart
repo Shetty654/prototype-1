@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sample/Home.dart';
 import 'package:sample/otp_verify.dart';
 import 'package:sample/sign_up.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MobileAuth extends StatefulWidget {
   const MobileAuth({super.key});
@@ -15,6 +19,20 @@ class MobileAuth extends StatefulWidget {
 class _MobileAuthState extends State<MobileAuth> {
   TextEditingController mobileController = TextEditingController();
 
+  Future<String> getDeviceId() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.id ?? "unknown_android_device";
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      return iosInfo.identifierForVendor ?? "unknown_ios_device";
+    } else {
+      return "unsupported_platform";
+    }
+  }
+
+
   Future<void> handlePostLogin(User user, BuildContext context) async {
     DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection("users")
@@ -22,13 +40,17 @@ class _MobileAuthState extends State<MobileAuth> {
         .get();
 
     if (!snapshot.exists) {
-      print("User does NOT exist, going to SignUp()");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SignUp(uid: user.uid)),
       );
     } else {
-      print("User exists, going to Home()");
+      String sessionId = await getDeviceId();
+      final pref = await SharedPreferences.getInstance();
+      await pref.setString('sessionid', sessionId);
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+        "sessionid": sessionId,
+      }, SetOptions(merge: true));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
