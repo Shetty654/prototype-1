@@ -5,6 +5,8 @@ import 'package:sample/Home.dart';
 import 'package:sample/sign_up.dart';
 import 'dart:developer';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class OTPVerify extends StatefulWidget {
   final String verificationId;
   OTPVerify({super.key, required this.verificationId});
@@ -23,19 +25,24 @@ class _OTPVerifyState extends State<OTPVerify> {
         .get();
 
     if (!snapshot.exists) {
-      print("User does NOT exist, going to SignUp()");
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SignUp(uid: user.uid)),
       );
     } else {
-      print("User exists, going to Home()");
+      String sessionId = await getDeviceId();
+      final pref = await SharedPreferences.getInstance();
+      await pref.setString('sessionid', sessionId);
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+        "sessionid": sessionId,
+      }, SetOptions(merge: true));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

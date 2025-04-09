@@ -29,12 +29,9 @@ class _HomeState extends State<Home> {
             String? localsessionid = pref.getString('sessionid');
             if(remotesessionid!=localsessionid){
               await FirebaseAuth.instance.signOut();
-              Fluttertoast.showToast(
-                msg: "Session expired!",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.CENTER, // center it
-                backgroundColor: Colors.black,
-                textColor: Colors.white,
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Your account is being used on a new device'),
+                duration: Duration(seconds: 3),)
               );
               Navigator.pushReplacement(
                   context,
