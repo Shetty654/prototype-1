@@ -31,7 +31,7 @@ class _HomeState extends State<Home> {
               await FirebaseAuth.instance.signOut();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Your account is being used on a new device'),
-                duration: Duration(seconds: 3),)
+                duration: Duration(seconds: 6),)
               );
               Navigator.pushReplacement(
                   context,

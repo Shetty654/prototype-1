@@ -111,7 +111,9 @@ class _MobileAuthState extends State<MobileAuth> {
                   codeAutoRetrievalTimeout: (String verificationId) {},
                 );
               },
-              child: Text("Verify Phone Number"),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Text('VERIFY PHONE NUMBER')),
             ),
           ],
         ),

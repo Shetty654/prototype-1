@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatefulWidget {
   final String uid;
+
   const SignUp({super.key, required this.uid});
 
   @override
@@ -31,6 +32,7 @@ Future<String> getDeviceId() async {
 class _SignUpState extends State<SignUp> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,35 +40,59 @@ class _SignUpState extends State<SignUp> {
       body: Center(
         child: Column(
           children: [
-            TextField(
-              keyboardType: TextInputType.text,
-              controller: usernameController,
-              decoration: InputDecoration(
-                hintText: "Enter user name",
-                border: OutlineInputBorder(),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  TextField(
+                    keyboardType: TextInputType.text,
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      hintText: "Enter user name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: "password",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      String sessionid = await getDeviceId();
+                      final pref = await SharedPreferences.getInstance();
+                      pref.setString('sessionid', sessionid);
+                      FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(widget.uid)
+                          .set({
+                            "username": usernameController.text,
+                            "password": passwordController.text,
+                            "sessionid": sessionid,
+                            "createdAt": Timestamp.now(),
+                          });
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => Home()),
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                      child: Text("SIGN UP"),
+                    ),
+                  ),
+                ],
               ),
             ),
-            TextField(
-              keyboardType: TextInputType.visiblePassword,
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: "password",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            ElevatedButton(onPressed: () async {
-                String sessionid = await getDeviceId();
-                final pref = await SharedPreferences.getInstance();
-                pref.setString('sessionid', sessionid);
-                FirebaseFirestore.instance.collection("users").doc(widget.uid).set({
-                  "username": usernameController.text,
-                  "password": passwordController.text,
-                  "sessionid": sessionid,
-                  "createdAt": Timestamp.now(),
-                });
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Home()));
-            }, child: Text("sign up"))
           ],
         ),
       ),

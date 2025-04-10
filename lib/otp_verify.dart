@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class OTPVerify extends StatefulWidget {
   final String verificationId;
+
   OTPVerify({super.key, required this.verificationId});
 
   @override
@@ -19,10 +20,11 @@ class _OTPVerifyState extends State<OTPVerify> {
   TextEditingController otpController = TextEditingController();
 
   Future<void> handlePostLogin(User user, BuildContext context) async {
-    DocumentSnapshot snapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(user.uid)
-        .get();
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .get();
 
     if (!snapshot.exists) {
       Navigator.pushReplacement(
@@ -43,14 +45,10 @@ class _OTPVerifyState extends State<OTPVerify> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("OTP Verify"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text("OTP Verify"), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -81,7 +79,10 @@ class _OTPVerifyState extends State<OTPVerify> {
                   log("Error: ${ex.toString()}");
                 }
               },
-              child: Text("Verify OTP"),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Text("VERIFY OTP"),
+              ),
             ),
           ],
         ),
